@@ -1,0 +1,28 @@
+name: AutoBashed SemVer
+on: push
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: "Generate Next SemVer"
+        id: version
+        uses: bencatlab/autobashed-semver@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          bump-tag: 'true'          # Bump tag to Git repository
+          file-update: 'true'       # Updates file with new semver and add change to last commit
+          file-path: 'package.json' # Path to the file to update
+          major: 'BREAKING'  # Keyword for MAJOR
+          minor: 'feat'          # Keyword for MINOR
+          prefix: 'v'               # Set a prefix to your tag
+          enable-snapshot: 'false'   # Generate as SNAPSHOT instead of RELEASE
+          snapshot-suffix: 'SNAPSHOT'   # Suffix for SNAPSHOT versioning (e.g. 1.0.1-beta.1)
+
+      - name: "Output SemVer from previous Step"
+        run: echo "${{ steps.version.outputs.semver }}"
