@@ -15,7 +15,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          bump-tag: 'true'          # Bump tag to Git repository
+          bump-tag: 'false'          # Bump tag to Git repository
           file-update: 'true'       # Updates file with new semver and add change to last commit
           file-path: 'package.json' # Path to the file to update
           major: 'BREAKING'  # Keyword for MAJOR
@@ -32,10 +32,17 @@ jobs:
         run: |
           NEW_BADGE="[![Version](https://img.shields.io/badge/version-${{ steps.version.outputs.semver }}-informational)](https://github.com/your-username/your-repo/actions)"
           sed -i '1s#.*#'"${NEW_BADGE}"'#' README.md
-      
+
       - name: "Commit changes"
         run: |
           git add README.md
           git pull > /dev/null 2>&1
           git commit --amend --no-edit > /dev/null 2>&1
           git push origin -f > /dev/null 2>&1
+
+      - name: "Bump tag"
+        run: |
+          tag_semver=${{ steps.version.outputs.semver }}
+          tag_message=$(git log -1 --pretty=%B)
+          git tag -a "${tag_semver}" -m "${tag_message}"
+          git push origin "${tag_semver}" >/dev/null 2>&1
